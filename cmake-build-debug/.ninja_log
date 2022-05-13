@@ -1,0 +1,8 @@
+# ninja log v5
+3	2340	6741257167716593	CMakeFiles/Open_Test_Cpp.dir/main.cpp.obj	6ca779cdc3fdfb5e
+2310	2689	6741246564175124	Open_Test_Cpp.exe	865e9a2d74057905
+15	1078	6741257155219578	CMakeFiles/Open_Test_Cpp.dir/opencv_findContours.cpp.obj	b7dd62c1838d36a9
+5	2519	6741258235861931	CMakeFiles/Open_Test_Cpp.dir/main.cpp.obj	6ca779cdc3fdfb5e
+2519	2882	6741258239454821	Open_Test_Cpp.exe	865e9a2d74057905
+4	2607	6741258445679799	CMakeFiles/Open_Test_Cpp.dir/main.cpp.obj	6ca779cdc3fdfb5e
+2607	2976	6741258449272387	Open_Test_Cpp.exe	865e9a2d74057905
