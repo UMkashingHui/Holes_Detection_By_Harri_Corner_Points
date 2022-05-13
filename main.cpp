@@ -391,6 +391,7 @@ Mat drawContours(Mat adjusted_img, Mat src_img){
     cv::Vec3b white(255, 255, 255);
     cv::Vec3b black(0, 0, 0);
     Mat mask;
+    vector<vector<Point> > contours;
     cv::cvtColor(src_img, src_img, cv::COLOR_BGR2GRAY);
 //    cv::threshold(src_img, mask, 125, 255, THRESH_BINARY_INV);
     bitwise_not(src_img,src_img);//颜色反转
@@ -443,33 +444,12 @@ Mat drawContours(Mat adjusted_img, Mat src_img){
 Mat src_gray;
 int thresh = 100;
 RNG rng(12345);
-void thresh_callback(int, void* );
 
-int opencv_findContours(String input_path){
-    Mat src = imread( input_path);
-    if( src.empty() )
-    {
-        cout << "Could not open or find the image!\n" << endl;
-        return -1;
-    }
-    cvtColor( src, src_gray, COLOR_BGR2GRAY );
-    blur( src_gray, src_gray, Size(3,3) );
-    const char* source_window = "Source";
-    namedWindow( source_window );
-    imshow( source_window, src );
-    const int max_thresh = 255;
-    createTrackbar( "Canny thresh:", source_window, &thresh, max_thresh, thresh_callback );
-    thresh_callback( 0, 0 );
-    waitKey();
-
-    return 0;
-}
-
-void thresh_callback(int, void* )
+vector<vector<Point>> thresh_callback(Mat src_gray)
 {
     Mat canny_output;
     Canny( src_gray, canny_output, thresh, thresh*2 );
-    vector<vector<Point> > contours;
+    vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
     Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
@@ -478,15 +458,67 @@ void thresh_callback(int, void* )
         Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
         drawContours( drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
     }
-    imshow( "Contours", drawing );
+//    for(int i = 0; i < contours.size(); i++){
+//        cout << contours[i] << endl;
+//    }
+//    imshow( "Contours", drawing );
+    return contours;
 }
+
+int opencv_findContours(String input_path, String output_path){
+    Mat src = imread( input_path);
+    Mat canny_output;
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+    float max_contourArea = 0;
+    vector<Point> max_contour;
+    int contour_idx = 0;
+
+
+    if( src.empty() )
+    {
+        cout << "Could not open or find the image!\n" << endl;
+        return -1;
+    }
+    cvtColor( src, src_gray, COLOR_BGR2GRAY );
+    blur( src_gray, src_gray, Size(3,3) );
+    Canny( src_gray, canny_output, thresh, thresh*2 );
+    findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
+
+    for( size_t i = 0; i< contours.size(); i++ )
+    {
+        if(contourArea(contours[i]) > max_contourArea){
+            max_contourArea = contourArea(contours[i]);
+            max_contour = contours[i];
+            contour_idx = i;
+        }
+//        Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+//        drawContours( drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
+    }
+//    const char* source_window = "Source";
+//    namedWindow( source_window );
+//    imshow( source_window, src );
+//    const int max_thresh = 255;
+//    createTrackbar( "Canny thresh:", source_window, &thresh, max_thresh, thresh_callback );
+//    waitKey();
+//    for(int i = 0; i < contours.size(); i++){
+//        cout << contours[i] << endl;
+//    }
+    drawContours(src, max_contour, contour_idx, (0, 0, 255), 10, LINE_8, hierarchy, 0);
+    imwrite(output_path, src);
+    cout << "Finished!" << endl;
+    return 0;
+}
+
+
 
 int main() {
 //    int pixel_int = 0;
 //    typedef Point3_<uint8_t> Pixel;
 
     String img_path = "E:\\Users\\Kevin\\Clion_Projects\\Open_Test_Cpp\\test.jpg";
-    opencv_findContours(img_path);
+    opencv_findContours(img_path, "findcontours_result.jpg");
 //    int flag = IMREAD_COLOR;
 //    int flag = IMREAD_GRAYSCALE;
 //    Mat img = readImg(img_path, flag);
